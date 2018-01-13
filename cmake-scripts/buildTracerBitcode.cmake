@@ -11,13 +11,20 @@ function(build_tracer_bitcode TEST_NAME f_SRC WORKLOAD)
   set(FULLTRACE_SO "$<TARGET_FILE:full_trace>")
 
   set(CFLAGS "-g" "-O1" "-fno-slp-vectorize" "-fno-vectorize"
-		"-fno-unroll-loops" "-fno-inline" "-fno-builtin")
+		"-fno-unroll-loops" "-fno-inline" "-fno-builtin"
+                "-I${ZLIB_INCLUDE_DIRS}")
 
   set(OPT_FLAGS "-disable-inlining" "-S" "-load=${FULLTRACE_SO}" "-fulltrace")
   set(LLC_FLAGS "-O0" "-disable-fp-elim" "-filetype=asm")
   set(FINAL_CXX_FLAGS "-O0" "-fno-inline")
-  set(FINAL_CXX_LDFLAGS "-lm" "-lz")
 
+  # I can not link library like "-l/foo/bar/libz.so"
+  # so rearrange it as "-L/foo/bar/ -lz"
+  # The rpath may not be necessary. Rpath forces program loader to search
+  # dynamic libraries form it, rather than system library path.
+  # Therefore I can check the linking through "ldd" command
+  get_filename_component(ZLIB_LIB_DIR ${ZLIB_LIBRARIES} DIRECTORY)
+  set(FINAL_CXX_LDFLAGS "-lm" "-L${ZLIB_LIB_DIR}" "-lz" "-Wl,-rpath=${ZLIB_LIB_DIR}")
 
   
   set(LLVMC_FLAGS ${LLVMC_FLAGS} ${CFLAGS})

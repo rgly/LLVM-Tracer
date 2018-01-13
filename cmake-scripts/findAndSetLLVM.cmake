@@ -32,6 +32,12 @@ add_definitions("-DLLVM_VERSION=${LLVM_NO_DOT_VERSION}")
 # probably some llvm-config work to do...
 SET(REQ_LLVM_LIBRARIES ${LLVM_LIBS})
 
+# This is used to check whether CMake can find & link
+# to non-system libraries. I installed a much newer zlib on otherplace.
+# Then force cmake to search the zlib newer than 1.2.10.
+#find_package(ZLIB 1.2.10 REQUIRED)
+find_package(ZLIB REQUIRED)
+
 # For debug use only
 if(${TEST_CMAKE})
   message("debug messages below")
